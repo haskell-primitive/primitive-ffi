@@ -1,6 +1,6 @@
 cabal-version: 2.2
 name:
-  primitive-ffi
+  primitive-foreign
 version:
   0.1
 synopsis:
