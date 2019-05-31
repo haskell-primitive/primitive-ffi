@@ -29,7 +29,7 @@ extra-doc-files:
     README.md
   , CHANGELOG.md
 tested-with:
-  GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.3
+  GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.5
 
 library
   hs-source-dirs:
@@ -37,7 +37,7 @@ library
   exposed-modules:
     Data.Primitive.Foreign
   build-depends:
-    , base >= 4.10.1.0 && < 4.13
+    , base >= 4.10.1 && < 4.13
     , primitive >= 0.6.4 && < 0.8
   ghc-options:
     -Wall
