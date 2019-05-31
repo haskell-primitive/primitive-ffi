@@ -85,8 +85,7 @@ import qualified Foreign as F
 --   necessarily the concrete implementation of the
 --   function.
 peekElemOff :: forall a. Prim a => Ptr a -> Int -> IO a
-peekElemOff !ptr !idx = coerce
-  <$> F.peekElemOff @(PrimStorable a) (castPtr ptr) idx
+peekElemOff !ptr = coerce (F.peekElemOff @(PrimStorable a) (castPtr ptr))
 
 -- | Write a value to a memory area regarded as an array of
 --   values of the same kind. The following equality holds:
@@ -101,8 +100,7 @@ pokeElemOff !ptr !idx a = F.pokeElemOff (castPtr ptr) idx (PrimStorable a)
 --
 --   > peekByteOff addr off = peek (addr `plusPtr` off)
 peekByteOff :: forall a. Prim a => Ptr Void -> Int -> IO a
-peekByteOff !ptr !idx = coerce
-  <$> F.peekByteOff @(PrimStorable a) ptr idx
+peekByteOff !ptr = coerce (F.peekByteOff @(PrimStorable a) ptr)
 
 -- | Write a value to a memory location given by a base
 --   address and offset. The following equality holds:
@@ -119,7 +117,7 @@ pokeByteOff !ptr !idx a = F.pokeByteOff ptr idx (PrimStorable a)
 --   or poking values of some type @a@, the alignment constraint for
 --   @a@, as given by the function 'alignment' is fulfilled.
 peek :: forall a. Prim a => Ptr a -> IO a
-peek !ptr = coerce <$> F.peek (castPtr @a @(PrimStorable a) ptr)
+peek = coerce (F.peek . castPtr @a @(PrimStorable a))
 
 -- | Write the given value to the given memory location. Alignment
 --   restrictions might apply; see 'peek'.
@@ -146,7 +144,7 @@ calloc :: forall a. Prim a => IO (Ptr a)
 calloc = F.callocBytes (sizeOf @a undefined)
 
 realloc :: forall a b. Prim b => Ptr a -> IO (Ptr b)
-realloc ptr = castPtr <$> F.realloc @a @(PrimStorable b) ptr
+realloc ptr = coerce (F.realloc @a @(PrimStorable b) ptr)
 
 --------------------------------------------------------------------------------
 
@@ -174,20 +172,20 @@ allocaArray0 !idx f = F.allocaArray0 idx (coerce f :: Ptr (PrimStorable a) -> IO
 
 -- | Adjust the size of an array.
 reallocArray :: forall a. Prim a => Ptr a -> Int -> IO (Ptr a)
-reallocArray !ptr !idx = castPtr <$> F.reallocArray @(PrimStorable a) (castPtr ptr) idx
+reallocArray !ptr !idx = coerce (F.reallocArray @(PrimStorable a) (castPtr ptr) idx)
 
 -- | Adjust the size of an array, including an extra position for the
 --   terminating element.
 reallocArray0 :: forall a. Prim a => Ptr a -> Int -> IO (Ptr a)
-reallocArray0 !ptr !idx = castPtr <$> F.reallocArray0 @(PrimStorable a) (castPtr ptr) idx
+reallocArray0 !ptr !idx = coerce (F.reallocArray0 @(PrimStorable a) (castPtr ptr) idx)
 
 -- | Like 'mallocArray', but allocated memory is filled with bytes of value zero.
 callocArray :: forall a. Prim a => Int -> IO (Ptr a)
-callocArray !idx = castPtr <$> F.callocArray @(PrimStorable a) idx
+callocArray !idx = coerce (F.callocArray @(PrimStorable a) idx)
 
 -- | Like 'mallocArray0', but allocated memory is filled with bytes of value zero.
 callocArray0 :: forall a. Prim a => Int -> IO (Ptr a)
-callocArray0 !idx = castPtr <$> F.callocArray0 @(PrimStorable a) idx
+callocArray0 !idx = coerce (F.callocArray0 @(PrimStorable a) idx)
 
 -- | Convert an array of given length into a Haskell 'PrimArray'.
 peekArray :: forall a. Prim a => Int -> Ptr a -> IO (PrimArray a)
@@ -307,6 +305,6 @@ with :: forall a b. Prim a => a -> (Ptr a -> IO b) -> IO b
 with val f = F.with (PrimStorable val) (coerce f :: Ptr (PrimStorable a) -> IO b)
 
 new :: forall a. Prim a => a -> IO (Ptr a)
-new val = castPtr <$> F.new (PrimStorable val)
+new val = coerce (F.new (PrimStorable val))
 
 --------------------------------------------------------------------------------
