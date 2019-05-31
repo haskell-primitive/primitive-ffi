@@ -1,4 +1,4 @@
-cabal-version: 2.4
+cabal-version: 2.2
 name:
   primitive-ffi
 version:
@@ -35,9 +35,10 @@ library
   hs-source-dirs:
     src
   exposed-modules:
-    PrimitiveFfi
+    Data.Primitive.Foreign
   build-depends:
     , base >= 4.10.1.0 && < 4.13
+    , primitive >= 0.6.4 && < 0.8
   ghc-options:
     -Wall
     -O2
