@@ -2,8 +2,10 @@
 
 {-# language BangPatterns #-}
 {-# language ForeignFunctionInterface #-}
+{-# language MagicHash #-}
 {-# language ScopedTypeVariables #-}
 {-# language TypeApplications #-}
+{-# language UnboxedTuples #-}
 
 --------------------------------------------------------------------------------
 
@@ -61,10 +63,12 @@ module Data.Primitive.Foreign
 
 --------------------------------------------------------------------------------
 
+import Control.Monad.Primitive (primitive)
 import Data.Coerce (coerce)
 import Data.Primitive.PrimArray
 import Data.Primitive.Types
 import Data.Void (Void)
+import GHC.Exts
 import GHC.Ptr
 
 import qualified Foreign as F
@@ -191,17 +195,12 @@ callocArray0 !idx = castPtr <$> F.callocArray0 @(PrimStorable a) idx
 
 -- | Convert an array of given length into a Haskell 'PrimArray'.
 peekArray :: forall a. Prim a => Int -> Ptr a -> IO (PrimArray a)
-peekArray !sz !ptr = if sz <= 0
-  then pure mempty
-  else do
-    marr <- newPrimArray sz
-    let go !ix = if ix < sz
-          then do
-            writePrimArray marr ix =<< peekElemOff ptr ix
-            go (ix + 1)
-          else pure ()
-    go 0
-    unsafeFreezePrimArray marr
+peekArray !sz@(I# n#) !(Ptr addr#) = do
+  marr@(MutablePrimArray ba#) <- newPrimArray sz
+  primitive $ \s0# ->
+    case (copyAddrToByteArray# addr# ba# 0# (n# *# (sizeOf# @a undefined)) s0#) of
+      s1# -> (# s1#, () #)
+  unsafeFreezePrimArray marr
 
 -- | Convert an array terminated by the given terminator into a Haskell
 -- 'PrimArray'.
