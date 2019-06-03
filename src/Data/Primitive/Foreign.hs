@@ -148,7 +148,7 @@ calloc :: forall a. Prim a => IO (Ptr a)
 calloc = F.callocBytes (sizeOf @a undefined)
 
 realloc :: forall a b. Prim b => Ptr a -> IO (Ptr b)
-realloc ptr = coerce (F.realloc @a @(PrimStorable b) ptr)
+realloc ptr = coerce (F.realloc ptr :: IO (Ptr (PrimStorable b)))
 
 --------------------------------------------------------------------------------
 
