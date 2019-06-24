@@ -141,12 +141,31 @@ poke !ptr a = F.poke (coerce ptr) (PrimStorable a)
 alloca :: forall a b. Prim a => (Ptr a -> IO b) -> IO b
 alloca f = F.alloca (coerce f :: Ptr (PrimStorable a) -> IO b)
 
+-- | Allocate a block of memory that is sufficient to hold values of type
+--   @a@.  The size of the area allocated is determined by the 'sizeOf'
+--   method from the instance of 'Storable' for the appropriate type.
+--
+--   The memory may be deallocated using 'free' or 'finalizerFree' when
+--   no longer required.
+--
 malloc :: forall a. Prim a => IO (Ptr a)
 malloc = F.mallocBytes (sizeOf @a undefined)
 
+-- | Like 'malloc' but memory is filled with bytes of value zero.
+--
 calloc :: forall a. Prim a => IO (Ptr a)
 calloc = F.callocBytes (sizeOf @a undefined)
 
+-- | Resize a memory area that was allocated with 'malloc' or 'mallocBytes'
+--   to the size needed to store values of type @b@.  The returned pointer
+--   may refer to an entirely different memory area, but will be suitably
+--   aligned to hold values of type @b@.  The contents of the referenced
+--   memory area will be the same as of the original pointer up to the
+--   minimum of the original size and the size of values of type @b@.
+--
+--   If the argument to 'realloc' is 'nullPtr', 'realloc' behaves like
+--   'malloc'.
+--
 realloc :: forall a b. Prim b => Ptr a -> IO (Ptr b)
 realloc ptr = coerce (F.realloc ptr :: IO (Ptr (PrimStorable b)))
 
@@ -300,9 +319,24 @@ moveArray !dest !src !size = F.moveBytes dest src (size * sizeOf @a undefined)
 
 -- [Section: Foreign.Marshal.Utils]
 
+-- | @'with' val f@ executes the computation @f@, passing as argument
+--   a pointer to a temporarily allocated block of memory into which
+--   @val@ has been marshalled (the combination of 'alloca' and 'poke').
+--
+--   The memory is freed when @f@ terminates (either normally or via an
+--   exception), so the pointer passed to @f@ must /not/ be used after this.
+--
 with :: forall a b. Prim a => a -> (Ptr a -> IO b) -> IO b
 with val f = F.with (PrimStorable val) (coerce f :: Ptr (PrimStorable a) -> IO b)
 
+-- | Allocate a block of memory and marshal a value into it
+--  (the combination of 'malloc' and 'poke').
+--  The size of the area allocated is determined by the 'Data.Primitive.Types.sizeOf'
+--  method from the instance of 'Storable' for the appropriate type.
+--
+--  The memory may be deallocated using 'free' or
+--  'finalizerFree' when no longer required.
+--
 new :: forall a. Prim a => a -> IO (Ptr a)
 new val = coerce (F.new (PrimStorable val))
 
