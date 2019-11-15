@@ -9,6 +9,9 @@
 
 --------------------------------------------------------------------------------
 
+-- | A collection of data types, classes, and functions for interfacing
+--   with another programming language using the `Prim` interface instead
+--   of the `Storable` interface.
 module Data.Primitive.Foreign
   (
     -- * Prim-Storable methods
