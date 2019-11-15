@@ -40,7 +40,7 @@ library
   exposed-modules:
     Data.Primitive.Foreign
   build-depends:
-    , base >= 4.10.1 && < 4.13
+    , base >= 4.10.1 && < 4.14
     , primitive >= 0.6.4 && < 0.8
   ghc-options:
     -Wall
