@@ -2,7 +2,7 @@ cabal-version: 2.2
 name:
   primitive-foreign
 version:
-  0.1
+  0.1.1
 synopsis:
   using the `Prim` interface for the FFI
 description:
